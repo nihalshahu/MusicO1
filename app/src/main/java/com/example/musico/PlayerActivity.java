@@ -6,6 +6,7 @@ import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class PlayerActivity extends AppCompatActivity {
 
@@ -26,6 +28,8 @@ public class PlayerActivity extends AppCompatActivity {
     Thread updateSeekBar;
     Button pause,next,previous;
     TextView songNameText;
+    TextToSpeech textToSpeech;
+
 
     String sname;
     @SuppressLint("NewApi")
@@ -46,6 +50,14 @@ public class PlayerActivity extends AppCompatActivity {
         next = (Button)findViewById(R.id.next);
 
         sb=(SeekBar)findViewById(R.id.seekBar);
+
+        textToSpeech=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+         public void onInit(int status) {
+             if(status != TextToSpeech.ERROR) {
+                 textToSpeech.setLanguage(Locale.UK);
+             }
+         }
+        });
 
 
         updateSeekBar=new Thread(){
@@ -114,6 +126,8 @@ public class PlayerActivity extends AppCompatActivity {
         pause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String speak = pause.getText().toString().trim();
+                speakMethod(speak);
                 sb.setMax(mp.getDuration());
                 if(mp.isPlaying()){
                     pause.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp);
@@ -130,6 +144,8 @@ public class PlayerActivity extends AppCompatActivity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String speak = next.getText().toString().trim();
+                speakMethod(speak);
                 mp.stop();
                 mp.release();
                 position=((position+1)%mySongs.size());
@@ -149,6 +165,8 @@ public class PlayerActivity extends AppCompatActivity {
         previous.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String speak = previous.getText().toString().trim();
+                speakMethod(speak);
                 //songNameText.setText(getSongName);
                 mp.stop();
                 mp.release();
@@ -165,7 +183,11 @@ public class PlayerActivity extends AppCompatActivity {
 
     }
 
-     @Override
+    private void speakMethod(String speak) {
+        textToSpeech.speak(speak, TextToSpeech.QUEUE_FLUSH, null);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId()==android.R.id.home){
            onBackPressed();
